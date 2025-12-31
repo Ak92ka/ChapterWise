@@ -2,6 +2,7 @@ import express from "express";
 import cors from "cors";
 import dotenv from "dotenv";
 import OpenAI from "openai";
+import crypto from "crypto"; // for hashing chapter text
 
 dotenv.config();
 
@@ -16,8 +17,56 @@ const openai = new OpenAI({
   apiKey: process.env.OPENAI_API_KEY,
 });
 
+// // In-memory storage for daily usage
+// const dailyUsage = {}; // { userId: timestampOfLastRequest }
+
+// const cache = {}; // { chapterHash: aiOutput }
+
+// Simple hash function for chapter text
+function hashFunction(text) {
+  return crypto.createHash("md5").update(text).digest("hex");
+}
+
 app.post("/api/generate-notes", async (req, res) => {
-  const { text } = req.body;
+  const { text, userId } = req.body;
+
+   // --- Backend validation: check empty text ---
+  if (!text || text.trim().length === 0) {
+    return res.status(400).json({ error: "Input cannot be empty." });
+  }
+
+// --- Backend validation: check max length ---
+  const MAX_LENGTH = 50000; // 50k characters
+  if (text.length > MAX_LENGTH) {
+    return res.status(400).json({
+      error: `Input exceeds maximum allowed length of ${MAX_LENGTH} characters.`,
+    });
+  }
+
+  // const chapterHash = hashFunction(text); // simple hash of text content
+
+  // // Serve from cache if exists
+  // if (cache[chapterHash]) {
+  //   console.log("Serving from cache:", chapterHash);
+  //   return res.json({ output: cache[chapterHash], cached: true });
+  // }
+
+
+  // // --- 1 request per day logic ---
+  // const now = Date.now();
+  // const oneDay = 24 * 60 * 60 * 1000;
+
+  // if (userId && dailyUsage[userId]) {
+  //   const lastRequest = dailyUsage[userId];
+  //   if (now - lastRequest < oneDay) {
+  //     return res.status(429).json({
+  //       error: "You’ve reached your daily limit. Subscribe for $5/month to generate notes unlimitedly.",
+  //     });
+  //   }
+  // }
+
+  // // Record current request
+  // if (userId) dailyUsage[userId] = now;
 
   try {
     const response = await openai.chat.completions.create({
@@ -36,7 +85,6 @@ Failure to follow the structure exactly is an error.
 GLOBAL FORMATTING RULE:
 - Use - hyphens ONLY for all bullets.
 - Do NOT use *, •, or numbered lists.
-- Output inside a grey code box (HTML &lt;pre&gt; or similar) to preserve literal formatting.
 
 
 Output format (DO NOT CHANGE OR REORDER SECTIONS):
@@ -79,7 +127,7 @@ Exam Focus:
 - Do NOT add explanations outside the sections above.
 - Do NOT add extra sections.
 - Do NOT exceed the specified number of bullets in any section.
-- Do NOT include opinions, commentary, or meta explanations.`
+- Do NOT include opinions, commentary, or meta explanations.`,
         },
         {
           role: "user",
@@ -93,11 +141,16 @@ Exam Focus:
     // Get the AI message
     const notes = response.choices[0].message.content;
 
-    res.json({ output: notes });
+    // Store in cache
+  // cache[chapterHash] = notes;
+
+    res.json({ output: notes, cached: false });
   } catch (err) {
     console.error(err);
     res.status(500).json({ output: "Error generating notes" });
   }
 });
 
-app.listen(PORT, () => console.log(`Backend running on http://localhost:${PORT}`));
+app.listen(PORT, () =>
+  console.log(`Backend running on http://localhost:${PORT}`)
+);

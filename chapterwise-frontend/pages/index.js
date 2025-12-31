@@ -6,22 +6,56 @@ import Footer from "@/components/Footer.js";
 export default function Home() {
   const [text, setText] = useState("");
   const [aiOutput, setAiOutput] = useState("");
+  const [loading, setLoading] = useState(false);
 
   const handleSummarize = async () => {
+    if (!text.trim()) {
+      setAiOutput("Please paste some text before generating notes.");
+      return;
+    }
+
+    // Validation: maximum length (e.g., 50,000 characters)
+    const maxLength = 50000;
+    if (text.length > maxLength) {
+      setAiOutput(
+        `Error: Chapter is too long. Please split it into smaller sections (max 50,000 characters).`
+      );
+      return;
+    }
+
+    setLoading(true); // show loading
+    setAiOutput(""); // clear previous output
+
     try {
+      let userId = localStorage.getItem("userId");
+      if (!userId) {
+        userId = crypto.randomUUID(); // generate a unique id
+        localStorage.setItem("userId", userId);
+      }
+
       const res = await fetch("http://localhost:5000/api/generate-notes", {
         method: "POST",
         headers: {
           "Content-Type": "application/json",
         },
-        body: JSON.stringify({ text }),
+        body: JSON.stringify({ text, userId }),
       });
 
-      const data = await res.json();
-      setAiOutput(data.output);
+      if (res.status === 429) {
+        const data = await res.json();
+        setAiOutput(data.error); // show daily limit message
+      } else if (!res.ok) {
+        setAiOutput("Error: Could not generate notes.");
+      } else {
+        const data = await res.json();
+        setAiOutput(data.output);
+      }
     } catch (err) {
       console.error(err);
-      setAiOutput("Error: Could not get summary.");
+      setAiOutput("Error: Could not connect to server.");
+    } finally {
+      setLoading(false);
+      setText("");
     }
   };
 
@@ -48,11 +82,13 @@ export default function Home() {
         {/* character count */}
         {/* Validation: check text length, prevent empty submission. */}
         {/* file upload (PDF, DOCX) support. */}
-        <button onClick={handleSummarize}>Generate Notes</button>
+        <button onClick={handleSummarize} disabled={loading}>
+          {loading ? "Generating notes..." : "Generate Notes"}
+        </button>{" "}
         {/* Disabled while AI is processing */}
         {/* Show a spinner or “Generating notes…” message while API call is in progress. */}
         {/* Error message handling (e.g., network errors, API errors). */}
-        <pre>
+        <pre className="ai-output">
           {aiOutput || "Output will appear here..."}
         </pre>
       </main>
