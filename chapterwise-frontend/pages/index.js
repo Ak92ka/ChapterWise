@@ -6,11 +6,23 @@ import Footer from "@/components/Footer.js";
 export default function Home() {
   const [text, setText] = useState("");
   const [aiOutput, setAiOutput] = useState("");
+  const [isAiOutput, setIsAiOutput] = useState(false);
   const [loading, setLoading] = useState(false);
+  const [copied, setCopied] = useState(false); // track copy status
 
   const handleSummarize = async () => {
     if (!text.trim()) {
       setAiOutput("Please paste some text before generating notes.");
+      setIsAiOutput(false); // not AI output
+      return;
+    }
+
+    // Validation: maximum length (e.g., 50,000 characters)
+    const minLength = 1000; // minimum characters for a chapter
+    if (text.length < minLength) {
+      setAiOutput(
+        `Your chapter is too short. Minimum length is ${minLength} characters.`
+      );
       return;
     }
 
@@ -44,19 +56,32 @@ export default function Home() {
       if (res.status === 429) {
         const data = await res.json();
         setAiOutput(data.error); // show daily limit message
+        setIsAiOutput(false); // backend error
       } else if (!res.ok) {
         setAiOutput("Error: Could not generate notes.");
       } else {
         const data = await res.json();
         setAiOutput(data.output);
+        setIsAiOutput(true); // this is actual AI output
       }
     } catch (err) {
       console.error(err);
       setAiOutput("Error: Could not connect to server.");
+      setIsAiOutput(false);
     } finally {
       setLoading(false);
       setText("");
     }
+  };
+
+  // copy to clipboard output
+  const handleCopy = () => {
+    if (!aiOutput) return;
+
+    navigator.clipboard.writeText(aiOutput).then(() => {
+      setCopied(true);
+      setTimeout(() => setCopied(false), 2000); // reset after 2s
+    });
   };
 
   return (
@@ -91,6 +116,9 @@ export default function Home() {
         <pre className="ai-output">
           {aiOutput || "Output will appear here..."}
         </pre>
+        <button onClick={handleCopy} disabled={!aiOutput || !isAiOutput}>
+          {copied ? "Copied!" : "Copy to Clipboard"}
+        </button>
       </main>
       <Footer />
     </>

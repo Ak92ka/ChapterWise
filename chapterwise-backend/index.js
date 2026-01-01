@@ -43,6 +43,15 @@ app.post("/api/generate-notes", async (req, res) => {
     });
   }
 
+  // --- Backend validation: check max length ---
+  const MIN_LENGTH = 1000; // minimum characters for a chapter
+  if (text.length < MIN_LENGTH) {
+    return res.status(400).json({
+      error: `Chapter is too short. Minimum length is ${MIN_LENGTH} characters.`
+    })
+  }
+
+
   // const chapterHash = hashFunction(text); // simple hash of text content
 
   // // Serve from cache if exists
@@ -75,6 +84,7 @@ app.post("/api/generate-notes", async (req, res) => {
         {
           role: "system",
           content: `You are an AI study assistant.
+
 The user is an undergraduate student. 
 The input is a textbook chapter.
 
@@ -105,11 +115,13 @@ Chapter Summary:
 Key Concepts:
 - Include AT LEAST 2, up to 5 key concepts.
 - Each bullet: Concept name + brief explanation (1–2 sentences).
+- Key concepts should focus on ideas, mechanisms, frameworks, or relationships, not formal term definitions.
 
 
 Important Definitions:
 - Include AT LEAST 2, up to 5 definitions.
 - Each bullet: Term + concise, exam-ready definition.
+- Definitions must NOT repeat terms already explained in Key Concepts unless absolutely necessary; prioritize distinct examinable terminology.
 
 
 Exam Focus:
@@ -127,7 +139,8 @@ Exam Focus:
 - Do NOT add explanations outside the sections above.
 - Do NOT add extra sections.
 - Do NOT exceed the specified number of bullets in any section.
-- Do NOT include opinions, commentary, or meta explanations.`,
+- Do NOT include opinions, commentary, or meta explanations.
+- Avoid repeating the same information across sections; each section must add new value.`,
         },
         {
           role: "user",
