@@ -156,7 +156,7 @@ A: [clear, direct answer in 2–3 sentences]
         },
       ],
       temperature: 0.7,
-      max_tokens: 500,
+      max_tokens: 1500,
     });
 
     // Get the AI message
