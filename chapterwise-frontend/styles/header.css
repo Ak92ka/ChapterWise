@@ -1,0 +1,13 @@
+.logo {
+    width: 50%;
+  max-width: 200px;
+  height: auto;
+}
+
+.app_button {
+    color: #fff;
+    background-color: #8172F8;
+    border-radius: 10px;
+    padding: 16px 16px;
+    font-size: 14px;
+}

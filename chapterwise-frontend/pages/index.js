@@ -4,85 +4,6 @@ import Header from "@/components/Header.js";
 import Footer from "@/components/Footer.js";
 
 export default function Home() {
-  const [text, setText] = useState("");
-  const [aiOutput, setAiOutput] = useState("");
-  const [isAiOutput, setIsAiOutput] = useState(false);
-  const [loading, setLoading] = useState(false);
-  const [copied, setCopied] = useState(false); // track copy status
-
-  const handleSummarize = async () => {
-    if (!text.trim()) {
-      setAiOutput("Please paste some text before generating notes.");
-      setIsAiOutput(false); // not AI output
-      return;
-    }
-
-    // Validation: maximum length (e.g., 50,000 characters)
-    const minLength = 1000; // minimum characters for a chapter
-    if (text.length < minLength) {
-      setAiOutput(
-        `Chapter is too short. Minimum length is ${minLength} characters.`
-      );
-      return;
-    }
-
-    // Validation: maximum length (e.g., 50,000 characters)
-    const maxLength = 50000;
-    if (text.length > maxLength) {
-      setAiOutput(
-        `Chapter is too long. Please split it into smaller sections (max 50,000 characters).`
-      );
-      return;
-    }
-
-    setLoading(true); // show loading
-    setAiOutput(""); // clear previous output
-
-    try {
-      let userId = localStorage.getItem("userId");
-      if (!userId) {
-        userId = crypto.randomUUID(); // generate a unique id
-        localStorage.setItem("userId", userId);
-      }
-
-      const res = await fetch("http://localhost:5000/api/generate-notes", {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-        },
-        body: JSON.stringify({ text, userId }),
-      });
-
-      if (res.status === 429) {
-        const data = await res.json();
-        setAiOutput(data.error); // show daily limit message
-        setIsAiOutput(false); // backend error
-      } else if (!res.ok) {
-        setAiOutput("Error: Could not generate notes.");
-      } else {
-        const data = await res.json();
-        setAiOutput(data.output);
-        setIsAiOutput(true); // this is actual AI output
-      }
-    } catch (err) {
-      console.error(err);
-      setAiOutput("Error: Could not connect to server.");
-      setIsAiOutput(false);
-    } finally {
-      setLoading(false);
-      setText("");
-    }
-  };
-
-  // copy to clipboard output
-  const handleCopy = () => {
-    if (!aiOutput) return;
-
-    navigator.clipboard.writeText(aiOutput).then(() => {
-      setCopied(true);
-      setTimeout(() => setCopied(false), 2000); // reset after 2s
-    });
-  };
 
   return (
     <>
@@ -94,31 +15,7 @@ export default function Home() {
       </Head>
       <main>
         <Header />
-        <p>Paste your textbook chapter in the box below.</p>
-        <p>
-          Click ‘Generate Notes’ to get exam-ready study notes formatted with
-          key sections.
-        </p>
-        <textarea
-          value={text}
-          onChange={(e) => setText(e.target.value)}
-          placeholder="Paste your chapter here…"
-        ></textarea>
-        {/* character count */}
-        {/* Validation: check text length, prevent empty submission. */}
-        {/* file upload (PDF, DOCX) support. */}
-        <button onClick={handleSummarize} disabled={loading}>
-          {loading ? "Generating notes..." : "Generate Notes"}
-        </button>{" "}
-        {/* Disabled while AI is processing */}
-        {/* Show a spinner or “Generating notes…” message while API call is in progress. */}
-        {/* Error message handling (e.g., network errors, API errors). */}
-        <pre className="ai-output">
-          {aiOutput || "Output will appear here..."}
-        </pre>
-        <button onClick={handleCopy} disabled={!aiOutput || !isAiOutput}>
-          {copied ? "Copied!" : "Copy to Clipboard"}
-        </button>
+        <p>Homepage.</p>
       </main>
       <Footer />
     </>

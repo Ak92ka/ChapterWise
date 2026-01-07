@@ -1,7 +1,9 @@
+
 export default function Header() {
   return (
     <header>
-      <h1 className="header-h1">ChapterWise</h1>
+      <img className="logo" src="/ChapterWise_logo.svg" alt="ChapterWise logo" width={130} height={60} />
+    <a href="/app" class="app_button">Try free</a>
     </header>
   );
 }
