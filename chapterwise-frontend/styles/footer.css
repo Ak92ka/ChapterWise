@@ -1,0 +1,37 @@
+.footer-container {
+  border-top: 1px solid #c4bdbd;
+  padding: 32px 18px 20px 18px;
+}
+
+.logo-footer {
+  width: 50%;
+  max-width: 200px;
+  height: auto;
+}
+
+.tagline-footer {
+  font-style: italic;
+  color: #d3d3d3;
+  padding-bottom: 16px;
+}
+
+.p-footer-14 {
+  font-size: 14px;
+  padding-bottom: 16px;
+}
+
+.copyright {
+  color: #a6a4a4;
+}
+
+.footer-container ul {
+  font-size: 15px;
+  list-style-type: none;
+  display: flex;
+  flex-direction: column;
+  gap: 3px;
+}
+
+.list-headline {
+  font-weight: 600;
+}

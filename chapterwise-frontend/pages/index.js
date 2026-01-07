@@ -4,7 +4,6 @@ import Header from "@/components/Header.js";
 import Footer from "@/components/Footer.js";
 
 export default function Home() {
-
   return (
     <>
       <Head>
@@ -15,7 +14,19 @@ export default function Home() {
       </Head>
       <main>
         <Header />
-        <p>Homepage.</p>
+        <div className="landing-container">
+          <p className="tagline1">Read less. Remember more.</p>
+          <h1 className="headline">
+            Turn textbook chapters into exam-ready notes
+          </h1>
+          <p className="sub-headline">
+            Upload a chapter. Get clear, structured notes made for exams.
+          </p>
+          <a href="/app" className="cta-app">
+            Summarize a chapter
+          </a>
+          <p className="tagline2">Designed for undergraduate exams</p>
+        </div>
       </main>
       <Footer />
     </>

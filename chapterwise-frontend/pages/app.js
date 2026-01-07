@@ -94,6 +94,7 @@ export default function App() {
       </Head>
       <main>
         <Header />
+        <div className="app-container">
         <p>Paste your textbook chapter in the box below.</p>
         <p>
           Click ‘Generate Notes’ to get exam-ready study notes formatted with
@@ -119,6 +120,7 @@ export default function App() {
         <button onClick={handleCopy} disabled={!aiOutput || !isAiOutput}>
           {copied ? "Copied!" : "Copy to Clipboard"}
         </button>
+        </div>
       </main>
       <Footer />
     </>

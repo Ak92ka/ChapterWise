@@ -1,5 +1,12 @@
-.logo {
-    width: 50%;
+.header-container {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 14px 16px 32px 16px;
+}
+
+.logo-header {
+    width: 38%;
   max-width: 200px;
   height: auto;
 }
@@ -8,6 +15,12 @@
     color: #fff;
     background-color: #8172F8;
     border-radius: 10px;
-    padding: 16px 16px;
+    padding: 8px 24px;
     font-size: 14px;
+    font-weight: 600;
+}
+
+.hamburger {
+  width: 32px;
+  height: 32px;
 }
