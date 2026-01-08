@@ -27,6 +27,12 @@ export default function Home() {
           </a>
           <p className="tagline2">Designed for undergraduate exams</p>
         </div>
+        <div className="how-it-works">
+        <h2>How it works?</h2>
+        <p><span className="numbered-list">1.</span> Upload a chapter</p>
+        <p><span className="numbered-list">2.</span> Get clean, structured notes</p>
+        <p><span className="numbered-list">3.</span> Study fast with confidence</p>
+        </div>
       </main>
       <Footer />
     </>

@@ -2,13 +2,21 @@ import { useState } from "react";
 import Head from "next/head";
 import Header from "@/components/Header.js";
 import Footer from "@/components/Footer.js";
+import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
+import { faArrowUpFromBracket } from "@fortawesome/free-solid-svg-icons";
+import { faCopy as faCopyRegular } from "@fortawesome/free-regular-svg-icons";
+import {
+  faCopy as faCopySolid,
+  faCheck,
+} from "@fortawesome/free-solid-svg-icons";
 
 export default function App() {
   const [text, setText] = useState("");
+  const [textareaActive, setTextareaActive] = useState(false);
   const [aiOutput, setAiOutput] = useState("");
   const [isAiOutput, setIsAiOutput] = useState(false);
   const [loading, setLoading] = useState(false);
-  const [copied, setCopied] = useState(false); // track copy status
+  const [copied, setCopied] = useState(false);
 
   const handleSummarize = async () => {
     if (!text.trim()) {
@@ -78,11 +86,19 @@ export default function App() {
   const handleCopy = () => {
     if (!aiOutput) return;
 
-    navigator.clipboard.writeText(aiOutput).then(() => {
-      setCopied(true);
-      setTimeout(() => setCopied(false), 2000); // reset after 2s
-    });
+    navigator.clipboard.writeText(aiOutput); // copy to clipboard
+    setCopied(true);
+
+    setTimeout(() => {
+      setCopied(false); // revert after 5-10 seconds
+    }, 5000); // 5000ms = 5 seconds
   };
+
+  const handleReset = () => {
+  setText("");        // clears the input
+  setAiOutput("");    // clears the output
+  setLoading(false);  // reset loading state if needed
+};
 
   return (
     <>
@@ -95,31 +111,88 @@ export default function App() {
       <main>
         <Header />
         <div className="app-container">
-        <p>Paste your textbook chapter in the box below.</p>
-        <p>
-          Click ‘Generate Notes’ to get exam-ready study notes formatted with
-          key sections.
-        </p>
-        <textarea
-          value={text}
-          onChange={(e) => setText(e.target.value)}
-          placeholder="Paste your chapter here…"
-        ></textarea>
-        {/* character count */}
-        {/* Validation: check text length, prevent empty submission. */}
-        {/* file upload (PDF, DOCX) support. */}
-        <button onClick={handleSummarize} disabled={loading}>
-          {loading ? "Generating notes..." : "Generate Notes"}
-        </button>{" "}
-        {/* Disabled while AI is processing */}
-        {/* Show a spinner or “Generating notes…” message while API call is in progress. */}
-        {/* Error message handling (e.g., network errors, API errors). */}
-        <pre className="ai-output">
-          {aiOutput || "Output will appear here..."}
-        </pre>
-        <button onClick={handleCopy} disabled={!aiOutput || !isAiOutput}>
-          {copied ? "Copied!" : "Copy to Clipboard"}
-        </button>
+          {!aiOutput && (
+            <>
+              <h1 className="app-h1">
+                Turn chapters into{" "}
+                <span className="highlight">exam-ready notes instantly</span>
+              </h1>
+              <p className="app-p">
+                Paste your chapter or upload a file, and get clear, exam-ready
+                notes in seconds.
+              </p>
+              <div className="textarea-wrapper">
+                <label htmlFor="chapterTextarea" className="sr-only"></label>
+                <textarea
+                  id="chapterTextarea"
+                  value={text}
+                  onChange={(e) => setText(e.target.value)}
+                  onFocus={() => setTextareaActive(true)}
+                  onBlur={() => setTextareaActive(false)}
+                  placeholder="Paste your chapter here…"
+                ></textarea>
+                {!text && !textareaActive && (
+                  <>
+                    <button className="upload-button">
+                      <FontAwesomeIcon
+                        className="upload-icon"
+                        icon={faArrowUpFromBracket}
+                      />
+                      Upload chapter
+                    </button>
+
+                    <p className="files-allowed">pdf, word, ppt, txt</p>
+                  </>
+                )}
+              </div>
+              {/* character count */}
+              {/* Validation: check text length, prevent empty submission. */}
+              {/* file upload (PDF, DOCX) support. */}
+              <button
+                onClick={handleSummarize}
+                disabled={loading}
+                className="app-button"
+              >
+                {loading ? "Creating your notes..." : "Create My Notes"}
+              </button>{" "}
+            </>
+          )}
+          {/* Disabled while AI is processing */}
+          {/* Show a spinner or “Generating notes…” message while API call is in progress. */}
+          {/* Error message handling (e.g., network errors, API errors). */}
+          {aiOutput && (
+            <>
+              <p className="output-success-message">Your notes are ready!</p>
+              <pre className="ai-output">
+                {aiOutput || "Output will appear here..."}
+              </pre>
+              <button
+                onClick={handleCopy}
+                disabled={!aiOutput || !isAiOutput}
+                className="copy-button"
+              >
+                {copied ? (
+                  <>
+                    <FontAwesomeIcon icon={faCheck} className="copied-icon" />
+                    <span className="copied-text">copied</span>
+                  </>
+                ) : (
+                  <>
+                    <FontAwesomeIcon
+                      icon={faCopyRegular}
+                      className="copy-icon"
+                    />
+                    <span className="copy-text">copy</span>
+                  </>
+                )}
+              </button>
+              <div>
+              <button onClick={handleReset} className="back-button">
+                Summarize another chapter
+              </button>
+              </div>
+            </>
+          )}
         </div>
       </main>
       <Footer />

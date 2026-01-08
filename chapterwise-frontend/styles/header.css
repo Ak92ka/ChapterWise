@@ -6,12 +6,13 @@
 }
 
 .logo-header {
-    width: 38%;
-  max-width: 200px;
+    width: 118px;
+      max-width: 38vw;
   height: auto;
+  padding-top: 12px;
 }
 
-.app_button {
+.header-cta {
     color: #fff;
     background-color: #8172F8;
     border-radius: 10px;
@@ -23,4 +24,5 @@
 .hamburger {
   width: 32px;
   height: 32px;
+  cursor: pointer;
 }

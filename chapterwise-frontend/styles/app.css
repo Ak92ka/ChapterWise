@@ -1,3 +1,146 @@
 .app-container {
-    padding: 0 0 32px 0;
+  padding: 0px 30px 32px 30px;
+}
+
+.app-h1 {
+  font-size: 28px;
+  font-weight: 400;
+      text-align: center;
+}
+
+.highlight {
+  font-weight: 700;
+}
+
+.app-p {
+  font-size: 14px;
+  color: #4a4a4a;
+  padding-bottom: 24px;
+  text-align: center;
+}
+
+.textarea-wrapper {
+  position: relative;
+  padding-bottom: 16px;
+}
+
+textarea {
+  border: 1px solid #e8e8e8;
+  border-radius: 10px;
+  padding: 16px;
+  width: 100%;
+  min-height: 220px;
+}
+
+textarea::placeholder {
+  color: #a6a4a4;
+}
+
+textarea:focus {
+  outline: none;
+  border-color: #8172F8;
+  box-shadow: 0 0 0 2px rgba(129, 114, 248, 0.2);
+}
+
+.upload-button {
+    cursor: pointer;
+    z-index: 10;
+    background-color: #fff;
+    border: 1px solid #e8e8e8;
+    border-radius: 20px;
+    padding: 15px 20px;
+    font-size: 18px;
+    font-weight: 700;
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    white-space: nowrap;
+}
+
+.upload-icon {
+    width: 24px;
+    height: 24px;
+    padding-right: 8px;
+}
+
+.files-allowed {
+    z-index: 10;
+    white-space: nowrap;
+    font-size: 13px;
+    position: absolute;
+    top: 68%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+}
+
+.app-button {
+    background-color: #8172F8;
+    color: #fff;
+    border-radius: 20px;
+    padding: 14px 18px;    border: 1px solid #8172F8;
+    font-weight: 600;
+    font-size: 16px;
+    display: block;      
+  margin: 0 auto 17px; 
+  cursor: pointer;
+}
+
+.app-button:disabled {
+  opacity: 0.6;
+}
+
+.ai-output {
+    white-space: pre-wrap;
+    word-wrap: break-word;
+    background-color: #f5f5f5;
+    border: 1px solid #ddd;
+    border-radius: 10px;
+    max-height: 50vh;
+    padding: 1rem;
+    font-family: arial;
+    overflow: auto;
+    font-size: 16px;
+    line-height: 1.5;
+    margin-bottom: 8px;
+}
+
+.output-success-message {
+    font-size: 20px;
+    text-align: center;
+}
+
+.copy-button {
+    width: 38px;
+    border: none;
+    background-color: #fff;
+    cursor: pointer;
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+    padding-left: 5px;
+}
+
+.copy-icon {
+    width: 22px;
+    height: 22px;
+}
+
+.copied-icon {
+    width: 22px;
+    height: 22px;
+}
+
+.back-button {
+background-color: #8172F8;
+    color: #fff;
+    border-radius: 20px;
+    padding: 14px 18px;
+    border: 1px solid #8172F8;
+    font-weight: 600;
+    font-size: 15px;
+    display: block;
+    margin: 16px auto 17px;
+    cursor: pointer;
+    transition: background-color 0.2s ease, transform 0.1s ease;
 }
