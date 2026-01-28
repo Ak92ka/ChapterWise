@@ -11,10 +11,93 @@ const upload = multer({ storage: multer.memoryStorage() });
 import signupHandler from "./auth/signup.js";
 import loginHandler from "./auth/login.js";
 import db from "./db.js";
+import Stripe from "stripe";
+import bodyParser from "body-parser";
+
 
 dotenv.config();
 
 const app = express();
+// ---------------- Stripe webhook first ----------------
+app.post(
+  "/webhook",
+  express.raw({ type: "application/json" }),
+  async (req, res) => {
+    const sig = req.headers["stripe-signature"];
+    let event;
+
+    try {
+      // Verify the webhook signature
+      event = stripe.webhooks.constructEvent(
+        req.body,
+        sig,
+        process.env.STRIPE_WEBHOOK_SECRET
+      );
+    } catch (err) {
+      console.log("⚠️ Webhook signature verification failed.", err.message);
+      return res.status(400).send(`Webhook Error: ${err.message}`);
+    }
+
+    // Handle checkout.session.completed
+    if (event.type === "checkout.session.completed") {
+      const session = event.data.object;
+      console.log("Checkout session completed:", session.id);
+      console.log("Customer email:", session.customer_email);
+
+      // Look up user in your SQLite DB
+      const user = db
+        .prepare("SELECT * FROM users WHERE email = ?")
+        .get(session.customer_email);
+
+      console.log("Found user:", user);
+
+      if (user) {
+        const now = new Date();
+        let subscriptionEnd = new Date();
+
+        // Fetch full subscription object from Stripe to get plan interval
+        try {
+          const subscription = await stripe.subscriptions.retrieve(session.subscription);
+          const interval = subscription.items.data[0].plan.interval; // "month" or "year"
+
+          if (interval === "year") {
+            subscriptionEnd.setFullYear(subscriptionEnd.getFullYear() + 1);
+          } else {
+            subscriptionEnd.setMonth(subscriptionEnd.getMonth() + 1);
+          }
+
+        } catch (err) {
+          console.error("Failed to fetch subscription from Stripe:", err);
+          // fallback to 1 month
+          subscriptionEnd.setMonth(subscriptionEnd.getMonth() + 1);
+        }
+
+        // Update user in DB
+        db.prepare(`
+          UPDATE users
+          SET subscribed = 1,
+              subscribedAt = ?,
+              subscribedUntil = ?,
+              stripeSubscriptionId = ?
+          WHERE id = ?
+        `).run(
+          now.toISOString(),
+          subscriptionEnd.toISOString(),
+          session.subscription,
+          user.id
+        );
+
+        console.log(`Updated subscription for user ${user.id} until ${subscriptionEnd}`);
+      } else {
+        console.log("User not found for email:", session.customer_email);
+      }
+    }
+
+    res.json({ received: true });
+  }
+);
+
+
 app.use(cors());
 app.use(express.json({ limit: "5mb" }));
 
@@ -217,7 +300,7 @@ app.post("/api/grant-subscription", (req, res) => {
 app.get("/api/me/:userId", (req, res) => {
   const user = db
     .prepare(`
-      SELECT id, name, email, subscribed, subscribedAt, subscribedUntil
+      SELECT id, name, email, subscribed, subscribedAt, subscribedUntil, cancelAtPeriodEnd
       FROM users
       WHERE id = ?
     `)
@@ -228,6 +311,7 @@ app.get("/api/me/:userId", (req, res) => {
   // Ensure nulls are properly set
   user.subscribedAt = user.subscribedAt || null;
   user.subscribedUntil = user.subscribedUntil || null;
+  user.cancelAtPeriodEnd = !!user.cancelAtPeriodEnd; // convert 0/1 to boolean
 
   res.json(user);
 });
@@ -280,5 +364,74 @@ app.post("/api/extract-text", upload.single("file"), async (req, res) => {
 
 app.post("/auth/signup", signupHandler);
 app.post("/auth/login", loginHandler);
+
+
+
+// Create Checkout Session
+const stripe = new Stripe(process.env.STRIPE_SECRET_KEY);
+
+app.post("/api/create-checkout-session", async (req, res) => {
+  const { userId, priceId } = req.body; // priceId from Stripe dashboard
+
+  try {
+    const user = db.prepare("SELECT * FROM users WHERE id = ?").get(userId);
+    if (!user) return res.status(404).json({ error: "User not found" });
+
+    const session = await stripe.checkout.sessions.create({
+      payment_method_types: ["card"],
+      mode: "subscription",
+      customer_email: user.email, // optional: prefill email
+      line_items: [
+        {
+          price: priceId,
+          quantity: 1,
+        },
+      ],
+      success_url: `${process.env.FRONTEND_URL}/account?success=true`,
+      cancel_url: `${process.env.FRONTEND_URL}/account?canceled=true`,
+    });
+
+    res.json({ url: session.url });
+  } catch (err) {
+    console.error(err);
+    res.status(500).json({ error: "Failed to create checkout session" });
+  }
+});
+
+app.post("/api/cancel-subscription", async (req, res) => {
+  const { userId } = req.body;
+
+  try {
+    const user = db.prepare("SELECT * FROM users WHERE id = ?").get(userId);
+    if (!user) return res.status(404).json({ error: "User not found" });
+
+    if (!user.stripeSubscriptionId) {
+      return res.status(400).json({ error: "No active subscription found" });
+    }
+
+    // Cancel at period end
+    const subscription = await stripe.subscriptions.update(
+      user.stripeSubscriptionId,
+      { cancel_at_period_end: true }
+    );
+
+    // Save cancel info to DB (keep subscribed = 1 for current period)
+    db.prepare(`
+      UPDATE users
+      SET subscribed = 1, cancelAtPeriodEnd = ?, stripeSubscriptionId = ?
+      WHERE id = ?
+    `).run(subscription.cancel_at_period_end ? 1 : 0, user.stripeSubscriptionId, userId);
+
+    res.json({
+      message: "Subscription will not renew after current period.",
+      current_period_end: subscription.current_period_end,
+    });
+  } catch (err) {
+    console.error(err);
+    res.status(500).json({ error: "Failed to cancel subscription" });
+  }
+});
+
+
 
 export default app;

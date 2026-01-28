@@ -7,28 +7,55 @@ export default function Account() {
   const [user, setUser] = useState(null);
   const [loading, setLoading] = useState(true);
 
-  // Function to fetch latest user info
-const refreshUser = async () => {
-  const savedUser = JSON.parse(localStorage.getItem("user"));
-  console.log("Before API:", savedUser);
+  // ---------------- Fetch latest user info ----------------
+  const refreshUser = async () => {
+    const savedUser = JSON.parse(localStorage.getItem("user"));
+    console.log("Before API:", savedUser);
 
-  if (!savedUser) return;
+    if (!savedUser) return;
 
-  try {
-    const res = await fetch(`http://localhost:5000/api/me/${savedUser.id}`);
-    const updatedUser = await res.json();
-    console.log("API response:", updatedUser);
+    try {
+      const res = await fetch(`http://localhost:5000/api/me/${savedUser.id}`);
+      const updatedUser = await res.json();
+      console.log("API response:", updatedUser);
 
-    localStorage.setItem("user", JSON.stringify(updatedUser));
-    setUser(updatedUser);
-  } catch (err) {
-    console.error(err);
-  } finally {
-    setLoading(false);
-  }
-};
+      localStorage.setItem("user", JSON.stringify(updatedUser));
+      setUser(updatedUser);
+    } catch (err) {
+      console.error(err);
+    } finally {
+      setLoading(false);
+    }
+  };
 
-  // On component mount, refresh user data
+  // ---------------- Handle Stripe Checkout ----------------
+  const handleSubscribe = async () => {
+    const savedUser = JSON.parse(localStorage.getItem("user"));
+    if (!savedUser) return alert("Please log in first.");
+
+    // Replace with your Stripe price IDs
+    const priceId = "price_monthly_id"; // for now only monthly; you can add yearly if needed
+
+    try {
+      const res = await fetch("http://localhost:5000/api/create-checkout-session", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ userId: savedUser.id, priceId }),
+      });
+
+      const data = await res.json();
+      if (data.url) {
+        window.location.href = data.url; // redirect to Stripe checkout
+      } else {
+        alert("Failed to start checkout.");
+      }
+    } catch (err) {
+      console.error(err);
+      alert("Failed to start checkout.");
+    }
+  };
+
+  // ---------------- On mount ----------------
   useEffect(() => {
     refreshUser();
   }, []);
@@ -36,7 +63,7 @@ const refreshUser = async () => {
   const formatDate = (dateStr) => {
     if (!dateStr) return "-";
     const d = new Date(dateStr);
-    if (isNaN(d)) return "-";  // handles invalid date strings
+    if (isNaN(d)) return "-";
     return d.toLocaleDateString();
   };
 
@@ -90,31 +117,49 @@ const refreshUser = async () => {
             <strong>Email:</strong> {user.email}
           </p>
 
-          {isSubscribed ? (
-            <>
-              <p>
-                <strong>Status:</strong> Subscribed
-              </p>
-              <p>
-                <strong>Subscribed from:</strong> {formatDate(user.subscribedAt)}
-              </p>
-              <p>
-                <strong>Subscribed until:</strong> {formatDate(user.subscribedUntil)}
-              </p>
-            </>
-          ) : (
-            <>
-              <p>
-                <strong>Status:</strong> Not subscribed
-              </p>
-              <button
-                className="subscribe-btn"
-                onClick={refreshUser} // For testing / manually refresh
-              >
-                Subscribe (coming soon)
-              </button>
-            </>
-          )}
+{isSubscribed ? (
+  <>
+    <p><strong>Status:</strong> Subscribed</p>
+    <p><strong>Subscribed from:</strong> {formatDate(user.subscribedAt)}</p>
+    <p><strong>Subscribed until:</strong> {formatDate(user.subscribedUntil)}</p>
+
+    {user.cancelAtPeriodEnd ? (
+      <p style={{ color: "orange" }}>
+        ⚠️ Your subscription will not renew after the current period.
+      </p>
+    ) : (
+      <button
+        className="cancel-btn"
+        onClick={() => {
+          const confirmCancel = window.confirm(
+            "Canceling will stop auto-renewal. You will retain access until the end of the current billing period. No refunds will be issued. Proceed?"
+          );
+          if (!confirmCancel) return;
+
+          fetch("http://localhost:5000/api/cancel-subscription", {
+            method: "POST",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify({ userId: user.id }),
+          })
+            .then(res => res.json())
+            .then(() => refreshUser()) // refresh state to reflect cancelAtPeriodEnd
+            .catch(err => console.error(err));
+        }}
+      >
+        Cancel Renewal
+      </button>
+    )}
+
+    <button className="subscribe-btn" onClick={handleSubscribe}>
+      Renew / Upgrade
+    </button>
+  </>
+) : (
+  <button className="subscribe-btn" onClick={() => window.location.href = "/pricing"}>
+    Subscribe
+  </button>
+)}
+
         </div>
       </div>
 

@@ -9,6 +9,28 @@ export default function Pricing() {
 
   const isMonthly = billing === "monthly";
 
+const handleSubscribe = async () => {
+  const savedUser = JSON.parse(localStorage.getItem("user"));
+  if (!savedUser) return alert("Please log in first.");
+
+  const priceId = isMonthly
+    ? "price_1SuWz8JCvZIg6jX8yPvYcOPK"
+    : "price_1SuWzzJCvZIg6jX8InOXpEbU"; // Stripe price IDs
+
+  try {
+    const res = await fetch("http://localhost:5000/api/create-checkout-session", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ userId: savedUser.id, priceId, billing: isMonthly ? "monthly" : "yearly" }),
+    });
+    const data = await res.json();
+    if (data.url) window.location.href = data.url;
+  } catch (err) {
+    console.error(err);
+    alert("Failed to start checkout.");
+  }
+};
+
   return (
     <>
       <Head>
@@ -22,9 +44,7 @@ export default function Pricing() {
 
         <div className="pricing-container">
           <h1>Pricing</h1>
-          <p className="pricing-subtitle">
-            Simple pricing. Cancel anytime.
-          </p>
+          <p className="pricing-subtitle">Simple pricing. Cancel anytime.</p>
 
           {/* Toggle */}
           <div className="billing-toggle">
@@ -47,25 +67,20 @@ export default function Pricing() {
             <h2>Plus</h2>
 
             <div className="price">
-              <span className="amount">
-                {isMonthly ? "$5" : "$36"}
-              </span>
-              <span className="period">
-                {isMonthly ? "/ month" : "/ year"}
-              </span>
+              <span className="amount">{isMonthly ? "$5" : "$36"}</span>
+              <span className="period">{isMonthly ? "/ month" : "/ year"}</span>
             </div>
 
             {!isMonthly && (
-              <p className="save-text">
-                Save 40% compared to monthly
-              </p>
+              <p className="save-text">Save 40% compared to monthly</p>
             )}
 
             <p className="plan-desc">
               Ideal for undergraduates who want clear, exam-focused notes.
             </p>
 
-            <button className="subscribe-btn">
+            <button className="subscribe-btn" onClick={handleSubscribe}>
+              {" "}
               Subscribe Now
             </button>
 
