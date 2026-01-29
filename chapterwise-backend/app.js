@@ -13,6 +13,8 @@ import loginHandler from "./auth/login.js";
 import db from "./db.js";
 import Stripe from "stripe";
 import bodyParser from "body-parser";
+import jwt from "jsonwebtoken";
+
 
 
 dotenv.config();
@@ -297,21 +299,23 @@ app.post("/api/grant-subscription", (req, res) => {
 });
 
 
-app.get("/api/me/:userId", (req, res) => {
+app.get("/api/me", authenticateToken, (req, res) => {
+  // JWT payload has user ID
+  const userId = req.user.id;
+
   const user = db
     .prepare(`
       SELECT id, name, email, subscribed, subscribedAt, subscribedUntil, cancelAtPeriodEnd
       FROM users
       WHERE id = ?
     `)
-    .get(req.params.userId);
+    .get(userId);
 
   if (!user) return res.status(404).json({ error: "User not found" });
 
-  // Ensure nulls are properly set
   user.subscribedAt = user.subscribedAt || null;
   user.subscribedUntil = user.subscribedUntil || null;
-  user.cancelAtPeriodEnd = !!user.cancelAtPeriodEnd; // convert 0/1 to boolean
+  user.cancelAtPeriodEnd = !!user.cancelAtPeriodEnd;
 
   res.json(user);
 });
@@ -432,6 +436,21 @@ app.post("/api/cancel-subscription", async (req, res) => {
   }
 });
 
+// Protect routes
+export function authenticateToken(req, res, next) {
+  const authHeader = req.headers["authorization"];
+  const token = authHeader && authHeader.split(" ")[1]; // Bearer <token>
+
+  if (!token) return res.status(401).json({ error: "Access denied. No token provided." });
+
+  try {
+    const decoded = jwt.verify(token, process.env.JWT_SECRET);
+    req.user = decoded; // attach user info to request
+    next();
+  } catch (err) {
+    res.status(403).json({ error: "Invalid or expired token." });
+  }
+}
 
 
 export default app;

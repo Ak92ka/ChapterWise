@@ -9,16 +9,27 @@ export default function Account() {
 
   // ---------------- Fetch latest user info ----------------
   const refreshUser = async () => {
-    const savedUser = JSON.parse(localStorage.getItem("user"));
-    console.log("Before API:", savedUser);
-
-    if (!savedUser) return;
+    const savedToken = localStorage.getItem("token");
+    if (!savedToken) {
+      setLoading(false);
+      return;
+    }
 
     try {
-      const res = await fetch(`http://localhost:5000/api/me/${savedUser.id}`);
-      const updatedUser = await res.json();
-      console.log("API response:", updatedUser);
+      const res = await fetch(`http://localhost:5000/api/me`, {
+        headers: {
+          "Authorization": `Bearer ${savedToken}`,
+        },
+      });
 
+      if (!res.ok) {
+        console.error("Failed to fetch user:", res.statusText);
+        setUser(null);
+        setLoading(false);
+        return;
+      }
+
+      const updatedUser = await res.json();
       localStorage.setItem("user", JSON.stringify(updatedUser));
       setUser(updatedUser);
     } catch (err) {
@@ -31,21 +42,24 @@ export default function Account() {
   // ---------------- Handle Stripe Checkout ----------------
   const handleSubscribe = async () => {
     const savedUser = JSON.parse(localStorage.getItem("user"));
-    if (!savedUser) return alert("Please log in first.");
+    const savedToken = localStorage.getItem("token");
+    if (!savedUser || !savedToken) return alert("Please log in first.");
 
-    // Replace with your Stripe price IDs
-    const priceId = "price_monthly_id"; // for now only monthly; you can add yearly if needed
+    const priceId = "price_monthly_id"; // replace with your Stripe price IDs
 
     try {
       const res = await fetch("http://localhost:5000/api/create-checkout-session", {
         method: "POST",
-        headers: { "Content-Type": "application/json" },
+        headers: {
+          "Content-Type": "application/json",
+          "Authorization": `Bearer ${savedToken}`,
+        },
         body: JSON.stringify({ userId: savedUser.id, priceId }),
       });
 
       const data = await res.json();
       if (data.url) {
-        window.location.href = data.url; // redirect to Stripe checkout
+        window.location.href = data.url;
       } else {
         alert("Failed to start checkout.");
       }
@@ -110,56 +124,57 @@ export default function Account() {
         <h1>Account</h1>
 
         <div className="account-card">
-          <p>
-            <strong>Name:</strong> {user.name}
-          </p>
-          <p>
-            <strong>Email:</strong> {user.email}
-          </p>
+          <p><strong>Name:</strong> {user.name}</p>
+          <p><strong>Email:</strong> {user.email}</p>
 
-{isSubscribed ? (
-  <>
-    <p><strong>Status:</strong> Subscribed</p>
-    <p><strong>Subscribed from:</strong> {formatDate(user.subscribedAt)}</p>
-    <p><strong>Subscribed until:</strong> {formatDate(user.subscribedUntil)}</p>
+          {isSubscribed ? (
+            <>
+              <p><strong>Status:</strong> Subscribed</p>
+              <p><strong>Subscribed from:</strong> {formatDate(user.subscribedAt)}</p>
+              <p><strong>Subscribed until:</strong> {formatDate(user.subscribedUntil)}</p>
 
-    {user.cancelAtPeriodEnd ? (
-      <p style={{ color: "orange" }}>
-        ⚠️ Your subscription will not renew after the current period.
-      </p>
-    ) : (
-      <button
-        className="cancel-btn"
-        onClick={() => {
-          const confirmCancel = window.confirm(
-            "Canceling will stop auto-renewal. You will retain access until the end of the current billing period. No refunds will be issued. Proceed?"
-          );
-          if (!confirmCancel) return;
+              {user.cancelAtPeriodEnd ? (
+                <p style={{ color: "orange" }}>
+                  ⚠️ Your subscription will not renew after the current period.
+                </p>
+              ) : (
+                <button
+                  className="cancel-btn"
+                  onClick={async () => {
+                    const confirmCancel = window.confirm(
+                      "Canceling will stop auto-renewal. You will retain access until the end of the current billing period. No refunds will be issued. Proceed?"
+                    );
+                    if (!confirmCancel) return;
 
-          fetch("http://localhost:5000/api/cancel-subscription", {
-            method: "POST",
-            headers: { "Content-Type": "application/json" },
-            body: JSON.stringify({ userId: user.id }),
-          })
-            .then(res => res.json())
-            .then(() => refreshUser()) // refresh state to reflect cancelAtPeriodEnd
-            .catch(err => console.error(err));
-        }}
-      >
-        Cancel Renewal
-      </button>
-    )}
+                    const token = localStorage.getItem("token");
+                    try {
+                      await fetch("http://localhost:5000/api/cancel-subscription", {
+                        method: "POST",
+                        headers: {
+                          "Content-Type": "application/json",
+                          "Authorization": `Bearer ${token}`,
+                        },
+                        body: JSON.stringify({ userId: user.id }),
+                      });
+                      refreshUser(); // refresh state to reflect cancelAtPeriodEnd
+                    } catch (err) {
+                      console.error(err);
+                    }
+                  }}
+                >
+                  Cancel Renewal
+                </button>
+              )}
 
-    <button className="subscribe-btn" onClick={handleSubscribe}>
-      Renew / Upgrade
-    </button>
-  </>
-) : (
-  <button className="subscribe-btn" onClick={() => window.location.href = "/pricing"}>
-    Subscribe
-  </button>
-)}
-
+              <button className="subscribe-btn" onClick={handleSubscribe}>
+                Renew / Upgrade
+              </button>
+            </>
+          ) : (
+            <button className="subscribe-btn" onClick={() => window.location.href = "/pricing"}>
+              Subscribe
+            </button>
+          )}
         </div>
       </div>
 

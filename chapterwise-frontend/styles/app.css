@@ -237,14 +237,21 @@ background-color: #8172F8;
   text-align: center;
 }
 
+.Signup-container form {
+  display: flex;
+  flex-direction: column;
+  gap: 8px; 
+}
+
 .Signup-container label {
   display: flex;
   flex-direction: column;
-  gap: 6px;
+  gap: 10px;
   font-weight: 600;
   font-size: 14px;
   color: #333;
 }
+
 
 .Signup-container input {
   padding: 12px 14px;
@@ -260,7 +267,7 @@ background-color: #8172F8;
 }
 
 .Signup-container button {
-  padding: 12px 16px;
+  padding: 12px 28px; /* slightly wider for a nicer button */
   border-radius: 12px;
   border: none;
   font-size: 16px;
@@ -269,6 +276,8 @@ background-color: #8172F8;
   background: #5b7cff;
   color: #fff;
   transition: transform 0.2s ease, background 0.2s ease;
+  align-self: center; /* centers button horizontally */
+  width: 100%;
 }
 
 .Signup-container button:hover {
@@ -281,6 +290,21 @@ background-color: #8172F8;
   color: #e74c3c;
   font-weight: 600;
   margin-top: 6px;
+}
+
+.Signup-container .message.success {
+  color: #27ae60; /* green for success */
+}
+
+.terms-note {
+  font-size: 0.85rem;
+  color: #666;
+  margin-top: 10px;
+}
+
+.terms-note a {
+  color: #4f46e5;
+  text-decoration: underline;
 }
 
 .login-container {

@@ -52,7 +52,7 @@ export default function About() {
             ChapterWise may update these terms at any time. Continued use of the
             service constitutes acceptance of any changes.
           </p>
-          <h2 className="privacy-policy-h2">Privacy Policy</h2>
+          <h2 className="privacy-policy-h2" id="privacy-policy">Privacy Policy</h2>
           <p className="numbered-list">1. Information We Collect</p>
           <p>
             We may collect information you provide, such as account details,
