@@ -68,11 +68,16 @@ export default function ResetPassword() {
   return (
     <>
       <Head>
-        <title>Reset Password</title>
-      </Head>
-
+  <title>Reset Your Password | ChapterIQ</title>
+  <meta
+    name="description"
+    content="Reset your ChapterIQ password securely to regain access to your account."
+  />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <meta name="robots" content="noindex, follow" />
+  <link rel="icon" href="/favicon.ico" />
+</Head>
       <Header />
-
       <div className="login-container">
         <div className="auth-card">
           <h1 className="reset-password-title">Reset Password</h1>

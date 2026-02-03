@@ -63,12 +63,15 @@ export default function Login() {
   return (
     <>
       <Head>
-        <title>ChapterIQ - Login</title>
-        <meta name="description" content="Login to ChapterIQ" />
-        <meta name="viewport" content="width=device-width, initial-scale=1" />
-        <link rel="icon" href="/favicon.ico" />
-      </Head>
-
+  <title>Log In | ChapterIQ</title>
+  <meta
+    name="description"
+    content="Log in to your ChapterIQ account to access your study notes and continue preparing for exams."
+  />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <meta name="robots" content="noindex, follow" />
+  <link rel="icon" href="/favicon.ico" />
+</Head>
       <main>
         <Header />
         <div className="login-container">

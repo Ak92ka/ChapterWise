@@ -17,9 +17,8 @@ export default function Account() {
 
     try {
       const res = await fetch("http://localhost:5000/api/me", {
-  credentials: "include", // this sends your cookie
-});
-
+        credentials: "include", // this sends your cookie
+      });
 
       if (!res.ok) {
         console.error("Failed to fetch user:", res.statusText);
@@ -47,14 +46,17 @@ export default function Account() {
     const priceId = "price_monthly_id"; // replace with your Stripe price IDs
 
     try {
-      const res = await fetch("http://localhost:5000/api/create-checkout-session", {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-          "Authorization": `Bearer ${savedToken}`,
+      const res = await fetch(
+        "http://localhost:5000/api/create-checkout-session",
+        {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json",
+            Authorization: `Bearer ${savedToken}`,
+          },
+          body: JSON.stringify({ userId: savedUser.id, priceId }),
         },
-        body: JSON.stringify({ userId: savedUser.id, priceId }),
-      });
+      );
 
       const data = await res.json();
       if (data.url) {
@@ -115,98 +117,121 @@ export default function Account() {
   return (
     <>
       <Head>
-        <title>ChapterIQ</title>
-      </Head>
+  <title>Your Account | ChapterIQ</title>
+  <meta
+    name="description"
+    content="Manage your ChapterIQ account settings, subscriptions, and personal information securely."
+  />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <meta name="robots" content="noindex, follow" />
+  <link rel="icon" href="/favicon.ico" />
+</Head>
       <Header />
 
       <div className="account-container">
         <h1>Account</h1>
 
         <div className="account-card">
-          <p><strong>Name:</strong> {user.name}</p>
-          <p><strong>Email:</strong> {user.email}</p>
+          <p>
+            <strong>Name:</strong> {user.name}
+          </p>
+          <p>
+            <strong>Email:</strong> {user.email}
+          </p>
 
-{isSubscribed ? (
-  <>
-    <p><strong>Status:</strong> Subscribed</p>
-    <p><strong>Plan:</strong> {user.planName} ({user.planPrice})</p>
-    <p><strong>Billing interval:</strong> {user.billingInterval}</p>
-    <p><strong>Subscribed from:</strong> {formatDate(user.subscribedAt)}</p>
-    <p><strong>Subscribed until:</strong> {formatDate(user.subscribedUntil)}</p>
+          {isSubscribed ? (
+            <>
+              <p>
+                <strong>Status:</strong> Subscribed
+              </p>
+              <p>
+                <strong>Plan:</strong> {user.planName} ({user.planPrice})
+              </p>
+              <p>
+                <strong>Billing interval:</strong> {user.billingInterval}
+              </p>
+              <p>
+                <strong>Subscribed from:</strong>{" "}
+                {formatDate(user.subscribedAt)}
+              </p>
+              <p>
+                <strong>Subscribed until:</strong>{" "}
+                {formatDate(user.subscribedUntil)}
+              </p>
+              {user.cancelAtPeriodEnd ? (
+                // Subscription is canceled, allow Reactivate only
+                <button
+                  className="reactivate-btn"
+                  onClick={async () => {
+                    const confirmReactivate = window.confirm(
+                      "This will reactivate your subscription and continue auto-renewal. Proceed?",
+                    );
+                    if (!confirmReactivate) return;
 
-    {user.cancelAtPeriodEnd ? (
-      // Subscription is canceled, allow Reactivate only
-      <button
-        className="reactivate-btn"
-        onClick={async () => {
-          const confirmReactivate = window.confirm(
-            "This will reactivate your subscription and continue auto-renewal. Proceed?"
-          );
-          if (!confirmReactivate) return;
+                    const token = localStorage.getItem("token");
+                    try {
+                      await fetch(
+                        "http://localhost:5000/api/reactivate-subscription",
+                        {
+                          method: "POST",
+                          headers: {
+                            "Content-Type": "application/json",
+                            Authorization: `Bearer ${token}`,
+                          },
+                          body: JSON.stringify({ userId: user.id }),
+                        },
+                      );
+                      refreshUser();
+                    } catch (err) {
+                      console.error(err);
+                    }
+                  }}
+                >
+                  Reactivate
+                </button>
+              ) : (
+                // Subscription is active, allow Cancel Renewal only
+                <button
+                  className="cancel-btn"
+                  onClick={async () => {
+                    const confirmCancel = window.confirm(
+                      "Canceling will stop auto-renewal. You will retain access until the end of the current billing period. No refunds will be issued. Proceed?",
+                    );
+                    if (!confirmCancel) return;
 
-          const token = localStorage.getItem("token");
-          try {
-            await fetch("http://localhost:5000/api/reactivate-subscription", {
-              method: "POST",
-              headers: {
-                "Content-Type": "application/json",
-                "Authorization": `Bearer ${token}`,
-              },
-              body: JSON.stringify({ userId: user.id }),
-            });
-            refreshUser();
-          } catch (err) {
-            console.error(err);
-          }
-        }}
-      >
-        Reactivate
-      </button>
-    ) : (
-      // Subscription is active, allow Cancel Renewal only
-      <button
-        className="cancel-btn"
-        onClick={async () => {
-          const confirmCancel = window.confirm(
-            "Canceling will stop auto-renewal. You will retain access until the end of the current billing period. No refunds will be issued. Proceed?"
-          );
-          if (!confirmCancel) return;
-
-          const token = localStorage.getItem("token");
-          try {
-            await fetch("http://localhost:5000/api/cancel-subscription", {
-              method: "POST",
-              headers: {
-                "Content-Type": "application/json",
-                "Authorization": `Bearer ${token}`,
-              },
-              body: JSON.stringify({ userId: user.id }),
-            });
-            refreshUser();
-          } catch (err) {
-            console.error(err);
-          }
-        }}
-      >
-        Cancel Renewal
-      </button>
-    )}
-  </>
-) : (
-  <button
-    className="subscribe-btn"
-    onClick={() => window.location.href = "/pricing"}
-  >
-    Subscribe
-  </button>
-)}
-
-
-
-
+                    const token = localStorage.getItem("token");
+                    try {
+                      await fetch(
+                        "http://localhost:5000/api/cancel-subscription",
+                        {
+                          method: "POST",
+                          headers: {
+                            "Content-Type": "application/json",
+                            Authorization: `Bearer ${token}`,
+                          },
+                          body: JSON.stringify({ userId: user.id }),
+                        },
+                      );
+                      refreshUser();
+                    } catch (err) {
+                      console.error(err);
+                    }
+                  }}
+                >
+                  Cancel Renewal
+                </button>
+              )}
+            </>
+          ) : (
+            <button
+              className="subscribe-btn"
+              onClick={() => (window.location.href = "/pricing")}
+            >
+              Subscribe
+            </button>
+          )}
         </div>
       </div>
-
       <Footer />
     </>
   );

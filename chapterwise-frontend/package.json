@@ -4,8 +4,9 @@
   "private": true,
   "scripts": {
     "dev": "next dev",
-    "build": "next build",
-    "start": "next start"
+    "build": "next build && node lib/generate-sitemap.js",
+    "start": "next start",
+      "generate-sitemap": "node lib/generate-sitemap.js"
   },
   "dependencies": {
     "@clerk/nextjs": "^6.36.9",

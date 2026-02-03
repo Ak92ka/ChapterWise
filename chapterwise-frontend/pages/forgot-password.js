@@ -52,12 +52,17 @@ export default function ForgotPassword() {
 
   return (
     <>
-      <Head>
-        <title>Forgot Password</title>
-      </Head>
-
+     <Head>
+  <title>Forgot Password | ChapterIQ</title>
+  <meta
+    name="description"
+    content="Forgot your ChapterIQ password? Enter your email to receive instructions and regain access to your account."
+  />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <meta name="robots" content="noindex, follow" />
+  <link rel="icon" href="/favicon.ico" />
+</Head>
       <Header />
-
       <div className="login-container">
         <div className="auth-card">
           <h1 className="forgot-password-title">Forgot Password</h1>

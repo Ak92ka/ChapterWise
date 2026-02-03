@@ -6,6 +6,7 @@ import { serialize } from "next-mdx-remote/serialize";
 import Head from "next/head";
 import Header from "@/components/Header";
 import Footer from "@/components/Footer";
+import SEOBlog from "@/components/SEOBlog";
 
 
 // Highlight component
@@ -15,14 +16,18 @@ function Highlight({ children }) {
 
 const components = { Highlight };
 
-export default function Post({ frontMatter, mdxSource }) {
+export default function Post({ frontMatter, mdxSource, slug }) {
   return (
     <>
-      <Head>
-        <title>{frontMatter.title} - ChapterIQ Blog</title>
-        <meta name="description" content={frontMatter.description} />
-        <meta name="viewport" content="width=device-width, initial-scale=1" />
-      </Head>
+    <SEOBlog
+                  title={frontMatter.title}
+                    description={frontMatter.description}
+                    url={`https://www.chapteriq.com/blog/${slug}`}
+                    image={frontMatter.ogImage}
+                    author={frontMatter.author}
+  datePublished={frontMatter.date}
+  dateModified={frontMatter.dateModified}
+                  />
       <Header />
       <main className="blog-main">
         <a href="/blog" className="back-to-blog">← Back to Blog</a>
@@ -76,5 +81,11 @@ export async function getStaticProps({ params: { slug } }) {
   const { data: frontMatter, content } = matter(markdownWithMeta);
   const mdxSource = await serialize(content);
 
-  return { props: { frontMatter, mdxSource } };
+  return { 
+    props: { 
+      frontMatter, 
+      mdxSource,
+      slug, // <-- pass it here
+    } 
+  };
 }

@@ -4,8 +4,9 @@ import emailjs from "@emailjs/browser";
 import Head from "next/head";
 import Header from "@/components/Header.js";
 import Footer from "@/components/Footer.js";
+import SEO from "@/components/SEO";
 
-export default function ContactForm() {
+export default function ContactForm({title, description, url, image}) {
   const [formData, setFormData] = useState({
     user_name: "",
     user_email: "",
@@ -70,12 +71,11 @@ export default function ContactForm() {
 
   return (
     <>
-      <Head>
-        <title>ChapterIQ - Contact</title>
-        <meta name="description" content="Contact ChapterIQ team" />
-        <meta name="viewport" content="width=device-width, initial-scale=1" />
-        <link rel="icon" href="/favicon.ico" />
-      </Head>
+    <SEO
+                  title="Contact ChapterIQ – Get Support or Ask a Question"
+                    description="Contact the ChapterIQ team for support, questions, or feedback about exam-focused study notes."
+                    url="https://www.chapteriq.com/contact"
+                  />
       <main>
         <Header />
         <div className="contact-container">

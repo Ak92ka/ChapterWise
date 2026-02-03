@@ -3,6 +3,7 @@ import { useState } from "react";
 import Head from "next/head";
 import Header from "@/components/Header.js";
 import Footer from "@/components/Footer.js";
+import SEO from "@/components/SEO";
 
 export default function Pricing() {
   const [billing, setBilling] = useState("monthly");
@@ -33,12 +34,11 @@ const handleSubscribe = async () => {
 
   return (
     <>
-      <Head>
-        <title>ChapterIQ Pricing</title>
-        <meta name="description" content="ChapterIQ pricing plans" />
-        <meta name="viewport" content="width=device-width, initial-scale=1" />
-      </Head>
-
+    <SEO
+          title="ChapterIQ Pricing – Simple Plans for Exam Preparation"
+            description="View ChapterIQ pricing plans and choose the option that fits your study needs. Simple, transparent pricing for exam-ready notes."
+            url="https://www.chapteriq.com/pricing"
+          />
       <main>
         <Header />
 

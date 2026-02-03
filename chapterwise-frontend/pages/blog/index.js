@@ -5,18 +5,16 @@ import Link from "next/link";
 import Head from "next/head";
 import Header from "@/components/Header";
 import Footer from "@/components/Footer";
+import SEOBlog from "@/components/SEOBlog";
 
 export default function Blog({ posts }) {
   return (
     <>
-      <Head>
-        <title>ChapterIQ - Blog</title>
-        <meta
-          name="description"
-          content="Read tips, study guides, and productivity articles by ChapterIQ"
-        />
-        <meta name="viewport" content="width=device-width, initial-scale=1" />
-      </Head>
+    <SEOBlog
+              title="Study Smarter for Exams – Tips & Guides"
+                description="Read exam-focused study tips, textbook guides, and productivity strategies to help you focus on what matters and pass your exams."
+                url="https://www.chapteriq.com/blog"
+              />
       <Header />
       <main className="blog-main">
         <div className="blog-container">

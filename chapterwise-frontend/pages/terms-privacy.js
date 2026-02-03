@@ -6,11 +6,14 @@ export default function About() {
   return (
     <>
       <Head>
-        <title>ChapterIQ - Terms & Privacy</title>
-        <meta name="description" content="ChapterIQ Terms & Privacy" />
-        <meta name="viewport" content="width=device-width, initial-scale=1" />
-        <link rel="icon" href="/favicon.ico" />
-      </Head>
+  <title>Terms of Service & Privacy Policy | ChapterIQ</title>
+  <meta
+    name="description"
+    content="Read ChapterIQ’s terms of service and privacy policy to understand how we handle user data and platform usage."
+  />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <link rel="icon" href="/favicon.ico" />
+</Head>
       <main>
         <Header />
         <div className="terms-privacy-container">
@@ -87,7 +90,7 @@ export default function About() {
 
           <p className="numbered-list">7. User Rights (GDPR)</p>
           <p>
-            You have the following rights regarding your personal data:
+            You have the following rights regarding your personal data:</p>
             <ul>
               <li><strong>Access:</strong> Request a copy of your data.</li>
               <li><strong>Correction:</strong> Correct inaccurate or incomplete data.</li>
@@ -96,6 +99,7 @@ export default function About() {
               <li><strong>Portability:</strong> Receive your data in a machine-readable format.</li>
               <li><strong>Object:</strong> Object to processing for marketing or other purposes.</li>
             </ul>
+            <p>
             Requests can be made by contacting us at <a href="mailto:support@ChapterIQ.com">support@ChapterIQ.com</a>.
           </p>
 
