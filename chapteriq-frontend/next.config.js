@@ -5,7 +5,7 @@ const withBundleAnalyzer = require('@next/bundle-analyzer')({
 
 module.exports = withBundleAnalyzer({
   reactStrictMode: true,
-  swcMinify: true, // keeps JS minified for performance
+  // swcMinify: true, // keeps JS minified for performance
   images: {
     formats: ['image/avif', 'image/webp'], // optimize images
   },
