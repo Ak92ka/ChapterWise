@@ -2,13 +2,13 @@
   "name": "chapteriq-frontend",
   "version": "0.1.0",
   "private": true,
-"scripts": {
-  "dev": "next dev",
-  "build": "next build && node lib/generate-sitemap.js",
-  "start": "next start",
-  "generate-sitemap": "node lib/generate-sitemap.js",
-  "analyze": "cross-env ANALYZE=true next build --webpack"
-},
+  "scripts": {
+    "dev": "next dev",
+    "build": "next build && node lib/generate-sitemap.js",
+    "start": "next start",
+    "generate-sitemap": "node lib/generate-sitemap.js",
+    "analyze": "cross-env ANALYZE=true next build --webpack"
+  },
   "dependencies": {
     "@clerk/nextjs": "^6.36.9",
     "@emailjs/browser": "^4.4.1",
@@ -20,6 +20,8 @@
     "@next-auth/prisma-adapter": "^1.0.7",
     "@next/mdx": "^16.1.6",
     "@prisma/client": "^7.3.0",
+    "@swc/core": "^1.15.11",
+    "@swc/helpers": "^0.5.18",
     "bcrypt": "^6.0.0",
     "formidable": "^3.5.4",
     "gray-matter": "^4.0.3",
