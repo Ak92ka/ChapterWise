@@ -11,17 +11,10 @@ import {
   faCheck,
 } from "@fortawesome/free-solid-svg-icons";
 // import mammoth from "mammoth/mammoth.browser";
-// import JSZip from "jszip";
-// import { parseStringPromise } from "xml2js";
 // import { jsPDF } from "jspdf";
+const JSZip = await import("jszip");
+import { parseStringPromise } from "xml2js";
 import SEO from "@/components/SEO";
-import dynamic from "next/dynamic";
-
-// Only load when the component mounts
-const Mammoth = dynamic(() => import("mammoth/mammoth.browser"), { ssr: false });
-const JSZipClient = dynamic(() => import("jszip"), { ssr: false });
-const Xml2Js = dynamic(() => import("xml2js"), { ssr: false });
-const JsPDF = dynamic(() => import("jspdf"), { ssr: false });
 
 
 export default function App() {
@@ -248,11 +241,14 @@ const handleReset = () => {
         extractedText = await file.text();
       }
       // ---------------- Word ----------------
-      else if (fileName.endsWith(".docx") || fileName.endsWith(".doc")) {
-        const arrayBuffer = await file.arrayBuffer();
-        const result = await mammoth.extractRawText({ arrayBuffer });
-        extractedText = result.value;
-      }
+    else if (fileName.endsWith(".docx")) {
+      const arrayBuffer = await file.arrayBuffer();
+
+      const mammoth = await import("mammoth/mammoth.browser");
+      const result = await mammoth.extractRawText({ arrayBuffer });
+
+      extractedText = result.value;
+    }
       // ---------------- PPTX ----------------
       else if (fileName.endsWith(".pptx") || fileName.endsWith(".ppt")) {
         const arrayBuffer = await file.arrayBuffer();
@@ -315,7 +311,7 @@ const handleReset = () => {
       setUploaded(true);
 
       if (generateButtonRef.current) {
-        generateButtonRef.current.classList.add("highlight");
+        generateButtonRef.current.classList.add("app-button-highlight");
         setTimeout(() => {
           generateButtonRef.current.classList.remove("highlight");
         }, 3000);

@@ -75,19 +75,26 @@ textarea:focus {
 }
 
 .app-button {
-    background-color: #5b3cb2;
-    color: #fff;
-    border-radius: 20px;
-    padding: 14px 18px;    border: 1px solid #8172F8;
-    font-weight: 600;
-    font-size: 16px;
-    display: block;      
-  margin: 0 auto 17px; 
+  background-color: #5b3cb2;
+  color: #fff;
+  border-radius: 20px;
+  padding: 14px 18px;
+  border: 1px solid #8172F8;
+  font-weight: 600;
+  font-size: 16px;
+  display: block;
+  margin: 0 auto 17px;
   cursor: pointer;
 }
 
+
 .app-button:disabled {
   opacity: 0.6;
+}
+
+.app-button-highlight {
+  box-shadow: 0 0 15px #8172F8;
+  transition: box-shadow 0.3s ease-in-out;
 }
 
 .ai-output {
@@ -145,10 +152,6 @@ background-color: #8172F8;
     transition: background-color 0.2s ease, transform 0.1s ease;
 }
 
-.app-button.highlight {
-  box-shadow: 0 0 15px #8172F8;
-  transition: box-shadow 0.3s ease-in-out;
-}
 
 .upload-feedback {
   font-size: 14px;
