@@ -5,6 +5,10 @@ import dynamic from "next/dynamic";
 import Link from "next/link";
 import Image from "next/image";
 import { useState, useEffect } from "react";
+import dotenv from "dotenv";
+
+dotenv.config();
+
 
 export default function Header() {
   const [menuOpen, setMenuOpen] = useState(false);
@@ -26,7 +30,7 @@ export default function Header() {
   const handleLogout = async () => {
     try {
       // Call backend logout endpoint
-      await fetch("http://localhost:5000/auth/logout", {
+      await fetch(`${process.env.NEXT_PUBLIC_BACKEND_URL}/auth/logout`, {
         method: "POST",
         credentials: "include", // important to send cookies
       });

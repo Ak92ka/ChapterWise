@@ -3,6 +3,9 @@ import Footer from "@/components/Footer.js";
 import Head from "next/head";
 import { useState } from "react";
 import { useRouter } from "next/router";
+import dotenv from "dotenv";
+
+dotenv.config();
 
 // import jwtDecode from "jwt-decode"; // optional, only if you need user info on the frontend
 
@@ -19,7 +22,7 @@ export default function Login() {
     setLoading(true);
 
     try {
-      const res = await fetch("http://localhost:5000/auth/login", {
+      const res = await fetch(`${process.env.NEXT_PUBLIC_BACKEND_URL}/auth/login`, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ email, password }),

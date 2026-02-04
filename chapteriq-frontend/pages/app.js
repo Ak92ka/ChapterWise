@@ -15,6 +15,9 @@ import {
 const JSZip = await import("jszip");
 import { parseStringPromise } from "xml2js";
 import SEO from "@/components/SEO";
+import dotenv from "dotenv";
+
+dotenv.config();
 
 
 export default function App() {
@@ -64,7 +67,7 @@ if (pdfMode && uploadedFile) {
       formData.append("endPage", endPage);
     }
 
-    const res = await fetch("http://localhost:5000/api/extract-text", {
+    const res = await fetch(`${process.env.NEXT_PUBLIC_BACKEND_URL}/api/extract-text`, {
       method: "POST",
       body: formData,
     });
@@ -172,7 +175,7 @@ const generateNotes = async (chapterText, fromPDF = false) => {
     }
 
     // --------------------- API CALL ---------------------
-    const res = await fetch("http://localhost:5000/api/generate-notes", {
+    const res = await fetch(`${process.env.NEXT_PUBLIC_BACKEND_URL}/api/generate-notes`, {
       method: "POST",
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify(payload),

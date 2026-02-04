@@ -3,6 +3,9 @@ import Footer from "@/components/Footer";
 import Head from "next/head";
 import { useRouter } from "next/router";
 import { useEffect, useState } from "react";
+import dotenv from "dotenv";
+
+dotenv.config();
 
 export default function ResetPassword() {
   const router = useRouter();
@@ -39,7 +42,7 @@ export default function ResetPassword() {
     setLoading(true);
 
     try {
-      const res = await fetch("http://localhost:5000/auth/reset-password", {
+      const res = await fetch(`${process.env.NEXT_PUBLIC_BACKEND_URL}/auth/reset-password`, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ token, password }),

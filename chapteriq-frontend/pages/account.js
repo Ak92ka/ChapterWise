@@ -2,6 +2,9 @@ import Header from "@/components/Header";
 import Footer from "@/components/Footer";
 import Head from "next/head";
 import { useEffect, useState } from "react";
+import dotenv from "dotenv";
+
+dotenv.config();
 
 export default function Account() {
   const [user, setUser] = useState(null);
@@ -16,7 +19,7 @@ export default function Account() {
     }
 
     try {
-      const res = await fetch("http://localhost:5000/api/me", {
+      const res = await fetch(`${process.env.NEXT_PUBLIC_BACKEND_URL}/api/me`, {
         credentials: "include", // this sends your cookie
       });
 
@@ -47,7 +50,7 @@ export default function Account() {
 
     try {
       const res = await fetch(
-        "http://localhost:5000/api/create-checkout-session",
+        `${process.env.NEXT_PUBLIC_BACKEND_URL}/api/create-checkout-session`,
         {
           method: "POST",
           headers: {
@@ -171,7 +174,7 @@ export default function Account() {
                     const token = localStorage.getItem("token");
                     try {
                       await fetch(
-                        "http://localhost:5000/api/reactivate-subscription",
+                        `${process.env.NEXT_PUBLIC_BACKEND_URL}/api/reactivate-subscription`,
                         {
                           method: "POST",
                           headers: {
@@ -202,7 +205,7 @@ export default function Account() {
                     const token = localStorage.getItem("token");
                     try {
                       await fetch(
-                        "http://localhost:5000/api/cancel-subscription",
+                        `${process.env.NEXT_PUBLIC_BACKEND_URL}/api/cancel-subscription`,
                         {
                           method: "POST",
                           headers: {

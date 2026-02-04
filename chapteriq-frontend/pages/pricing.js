@@ -4,6 +4,9 @@ import Head from "next/head";
 import Header from "@/components/Header.js";
 import Footer from "@/components/Footer.js";
 import SEO from "@/components/SEO";
+import dotenv from "dotenv";
+
+dotenv.config();
 
 export default function Pricing() {
   const [billing, setBilling] = useState("monthly");
@@ -19,7 +22,7 @@ const handleSubscribe = async () => {
     : "price_1SuWzzJCvZIg6jX8InOXpEbU"; // Stripe price IDs
 
   try {
-    const res = await fetch("http://localhost:5000/api/create-checkout-session", {
+    const res = await fetch(`${process.env.NEXT_PUBLIC_BACKEND_URL}/api/create-checkout-session`, {
       method: "POST",
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify({ userId: savedUser.id, priceId, billing: isMonthly ? "monthly" : "yearly" }),

@@ -2,6 +2,9 @@ import Header from "@/components/Header";
 import Footer from "@/components/Footer";
 import Head from "next/head";
 import { useState } from "react";
+import dotenv from "dotenv";
+
+dotenv.config();
 
 export default function ForgotPassword() {
   const [email, setEmail] = useState("");
@@ -25,7 +28,7 @@ export default function ForgotPassword() {
     setLoading(true);
 
     try {
-      const res = await fetch("http://localhost:5000/auth/forgot-password", {
+      const res = await fetch(`${process.env.NEXT_PUBLIC_BACKEND_URL}/auth/forgot-password`, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ email }),
