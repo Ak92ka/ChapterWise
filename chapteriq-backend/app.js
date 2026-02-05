@@ -294,6 +294,7 @@ app.post("/api/generate-notes", async (req, res) => {
     }
 
   // ----------------- OpenAI call -----------------
+  const openai = new OpenAI({ apiKey: process.env.OPENAI_API_KEY });
     const response = await openai.responses.create({
   model: "gpt-4.1-nano",
   input: [
