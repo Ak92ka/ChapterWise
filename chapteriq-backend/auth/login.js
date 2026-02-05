@@ -8,7 +8,13 @@ dotenv.config();
 export default async function loginHandler(req, res) {
   const { email, password } = req.body;
 
-  const user = db.prepare("SELECT * FROM users WHERE email = ?").get(email);
+// Async because db.query returns a promise
+const { rows } = await db.query(
+  "SELECT * FROM users WHERE email = $1",
+  [email]
+);
+
+const user = rows[0]; // single row, or undefined if not found
 
   if (!user) {
     return res.status(401).json({ error: "Invalid email or password" });

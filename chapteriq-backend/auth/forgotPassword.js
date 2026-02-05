@@ -8,7 +8,13 @@ export default async function forgotPassword(req, res) {
     return res.status(400).json({ error: "Email required" });
   }
 
-  const user = db.prepare("SELECT * FROM users WHERE email = ?").get(email);
+// Make sure this is inside an async function
+const { rows } = await db.query(
+  "SELECT * FROM users WHERE email = $1",
+  [email]
+);
+
+const user = rows[0]; // undefined if no user found
 
   // Always return success (security best practice)
   if (!user) {
@@ -25,11 +31,12 @@ export default async function forgotPassword(req, res) {
 
   const expires = new Date(Date.now() + 60 * 60 * 1000).toISOString(); // 1 hour
 
-  db.prepare(`
-    UPDATE users
-    SET resetToken = ?, resetTokenExpires = ?
-    WHERE id = ?
-  `).run(hashedToken, expires, user.id);
+await db.query(
+  `UPDATE users
+   SET resetToken = $1, resetTokenExpires = $2
+   WHERE id = $3`,
+  [hashedToken, expires, user.id]
+);
 
   const resetLink = `${process.env.FRONTEND_URL}/reset-password?token=${token}`;
 

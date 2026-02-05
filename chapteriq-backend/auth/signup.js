@@ -19,21 +19,27 @@ export default async function signupHandler(req, res) {
     });
   }
 
-  const existing = db
-    .prepare("SELECT * FROM users WHERE email = ?")
-    .get(email);
+// Check if the user already exists
+const { rows } = await db.query(
+  "SELECT * FROM users WHERE email = $1",
+  [email]
+);
+const existing = rows[0];
 
-  if (existing) {
-    return res.status(409).json({ error: "Email already exists" });
-  }
+if (existing) {
+  return res.status(409).json({ error: "Email already exists" });
+}
 
-  const hashed = await bcrypt.hash(password, 10);
-  const id = Date.now().toString();
+// Hash the password
+const hashed = await bcrypt.hash(password, 10);
+const id = Date.now().toString(); // or use UUID for production
 
-  db.prepare(`
-    INSERT INTO users (id, name, email, password, subscribed, subscribedAt, subscribedUntil)
-    VALUES (?, ?, ?, ?, 0, NULL, NULL)
-  `).run(id, name, email, hashed);
+// Insert new user
+await db.query(
+  `INSERT INTO users (id, name, email, password, subscribed, subscribedAt, subscribedUntil)
+   VALUES ($1, $2, $3, $4, 0, NULL, NULL)`,
+  [id, name, email, hashed]
+);
 
-  res.status(201).json({ message: "User created" });
+res.status(201).json({ message: "User created" });
 }

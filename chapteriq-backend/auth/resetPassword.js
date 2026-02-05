@@ -20,27 +20,32 @@ export default async function resetPassword(req, res) {
     .update(token)
     .digest("hex");
 
-  const user = db.prepare(`
-    SELECT * FROM users
-    WHERE resetToken = ?
-      AND resetTokenExpires > ?
-  `).get(hashedToken, new Date().toISOString());
+// Find the user by reset token
+const { rows } = await db.query(
+  `SELECT * FROM users
+   WHERE resetToken = $1
+     AND resetTokenExpires > $2`,
+  [hashedToken, new Date().toISOString()]
+);
 
-  if (!user) {
-    return res.status(400).json({
-      error: "Token is invalid or expired",
-    });
-  }
+const user = rows[0];
 
-  const hashedPassword = await bcrypt.hash(password, 10);
+if (!user) {
+  return res.status(400).json({ error: "Token is invalid or expired" });
+}
 
-  db.prepare(`
-    UPDATE users
-    SET password = ?,
-        resetToken = NULL,
-        resetTokenExpires = NULL
-    WHERE id = ?
-  `).run(hashedPassword, user.id);
+// Hash the new password
+const hashedPassword = await bcrypt.hash(password, 10);
+
+// Update the user's password and clear the token
+await db.query(
+  `UPDATE users
+   SET password = $1,
+       resetToken = NULL,
+       resetTokenExpires = NULL
+   WHERE id = $2`,
+  [hashedPassword, user.id]
+);
 
   res.json({
     message: "Password updated successfully. You can now log in.",
