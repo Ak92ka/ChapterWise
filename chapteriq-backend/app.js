@@ -153,7 +153,6 @@ async function querySingle(text, params) {
 }
 
 // ---------------- CORS & Middleware ----------------
-import cors from "cors";
 
 const allowedOrigins = [
   "http://localhost:3000",
