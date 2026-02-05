@@ -11,34 +11,43 @@ export default function Account() {
   const [loading, setLoading] = useState(true);
 
   // ---------------- Fetch latest user info ----------------
-  const refreshUser = async () => {
-    const savedToken = localStorage.getItem("token");
-    if (!savedToken) {
+const refreshUser = async () => {
+  const savedToken = localStorage.getItem("token");
+  if (!savedToken) {
+    setLoading(false);
+    return;
+  }
+
+  try {
+    const res = await fetch(
+      `${process.env.NEXT_PUBLIC_BACKEND_URL}/api/me`,
+      {
+        method: "GET",
+        headers: {
+          Authorization: `Bearer ${savedToken}`,
+          "Content-Type": "application/json",
+        },
+      }
+    );
+
+    if (!res.ok) {
+      console.error("Failed to fetch user:", res.statusText);
+      localStorage.removeItem("token");
+      localStorage.removeItem("user");
+      setUser(null);
       setLoading(false);
       return;
     }
 
-    try {
-      const res = await fetch(`${process.env.NEXT_PUBLIC_BACKEND_URL}/api/me`, {
-        credentials: "include", // this sends your cookie
-      });
-
-      if (!res.ok) {
-        console.error("Failed to fetch user:", res.statusText);
-        setUser(null);
-        setLoading(false);
-        return;
-      }
-
-      const updatedUser = await res.json();
-      localStorage.setItem("user", JSON.stringify(updatedUser));
-      setUser(updatedUser);
-    } catch (err) {
-      console.error(err);
-    } finally {
-      setLoading(false);
-    }
-  };
+    const updatedUser = await res.json();
+    localStorage.setItem("user", JSON.stringify(updatedUser));
+    setUser(updatedUser);
+  } catch (err) {
+    console.error("refreshUser error:", err);
+  } finally {
+    setLoading(false);
+  }
+};
 
   // ---------------- Handle Stripe Checkout ----------------
   const handleSubscribe = async () => {
